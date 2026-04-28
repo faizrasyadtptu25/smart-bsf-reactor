@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart BSF Reactor Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; display: inline-block; margin: 10px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; }
+        .value { font-size: 2em; font-weight: bold; color: #27ae60; }
+        .status { color: #e67e22; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Smart BSF Reactor - Group 5</h1>
+    <div class="card">
+        <h3>Temperatur</h3>
+        <div id="temp" class="value">--</div><span>°C</span>
+    </div>
+    <div class="card">
+        <h3>Kadar Amonia</h3>
+        <div id="amonia" class="value">--</div><span>ppm</span>
+    </div>
+    <div class="card">
+        <h3>Status Alat</h3>
+        <div id="status" class="status">Memuat...</div>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase kamu
+        const firebaseConfig = {
+            databaseURL: "https://smart-bsf-reactor-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Ambil data realtime
+        db.ref("monitoring").on("value", (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById("temp").innerText = data.temp.toFixed(2);
+            document.getElementById("amonia").innerText = data.amonia;
+            document.getElementById("status").innerText = data.status;
+        });
+    </script>
+</body>
+</html>
