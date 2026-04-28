@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart BSF Reactor Dashboard</title>
+    <title>Smart BSF Reactor - Group 5</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; display: inline-block; margin: 10px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; }
-        .value { font-size: 2em; font-weight: bold; color: #27ae60; }
-        .status { color: #e67e22; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; padding: 40px; }
+        .container { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; width: 200px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        h1 { color: #1a73e8; margin-bottom: 40px; }
+        h3 { color: #5f6368; font-size: 1.1em; }
+        .value { font-size: 2.5em; font-weight: bold; color: #202124; margin: 10px 0; }
+        .unit { color: #70757a; font-size: 0.5em; vertical-align: middle; }
+        .status-box { background: #e8f0fe; color: #1967d2; padding: 10px 20px; border-radius: 50px; font-weight: bold; display: inline-block; margin-top: 20px; }
     </style>
 </head>
 <body>
     <h1>Smart BSF Reactor - Group 5</h1>
-    <div class="card">
-        <h3>Temperatur</h3>
-        <div id="temp" class="value">--</div><span>°C</span>
+    
+    <div class="container">
+        <div class="card">
+            <h3>Temperatur</h3>
+            <div class="value"><span id="temp">--</span><span class="unit">°C</span></div>
+        </div>
+        <div class="card">
+            <h3>Kadar Amonia</h3>
+            <div class="value"><span id="amonia">--</span><span class="unit">ppm</span></div>
+        </div>
     </div>
-    <div class="card">
-        <h3>Kadar Amonia</h3>
-        <div id="amonia" class="value">--</div><span>ppm</span>
-    </div>
-    <div class="card">
-        <h3>Status Alat</h3>
-        <div id="status" class="status">Memuat...</div>
+
+    <div class="status-box">
+        Status Alat: <span id="status">Menghubungkan...</span>
     </div>
 
     <script>
-        // Konfigurasi Firebase kamu
+        // Konfigurasi Database kamu
         const firebaseConfig = {
             databaseURL: "https://smart-bsf-reactor-default-rtdb.firebaseio.com/"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Ambil data realtime
+        // Mengambil data secara REALTIME dari path "/monitoring"
         db.ref("monitoring").on("value", (snapshot) => {
             const data = snapshot.val();
-            document.getElementById("temp").innerText = data.temp.toFixed(2);
-            document.getElementById("amonia").innerText = data.amonia;
-            document.getElementById("status").innerText = data.status;
+            if (data) {
+                document.getElementById("temp").innerText = data.temp ? data.temp.toFixed(1) : "--";
+                document.getElementById("amonia").innerText = data.amonia || "--";
+                document.getElementById("status").innerText = data.status || "Normal";
+            }
+        }, (error) => {
+            console.error("Gagal baca data:", error);
+            document.getElementById("status").innerText = "Error Koneksi";
         });
     </script>
 </body>
