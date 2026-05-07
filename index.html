@@ -1,51 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart BSF Reactor - Group 5</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <title>Inkubator Monitoring</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f4f7f6; padding: 40px; }
-        .card-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 30px; border-radius: 20px; width: 200px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; margin-bottom: 30px; }
-        .value { font-size: 2.5em; font-weight: bold; color: #27ae60; }
-        .status-label { margin-top: 25px; font-weight: bold; padding: 10px 20px; background: #dfe6e9; border-radius: 50px; display: inline-block; }
+        body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
+        .card { background: white; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .value { font-size: 2em; font-weight: bold; color: #e67e22; }
     </style>
 </head>
 <body>
-    <h1>Smart BSF Reactor Dashboard</h1>
-    <div class="card-container">
-        <div class="card">
-            <h3>Suhu</h3>
-            <div class="value"><span id="temp">--</span>°C</div>
-        </div>
-        <div class="card">
-            <h3>Amonia</h3>
-            <div class="value"><span id="amonia">--</span></div>
-        </div>
+    <h1>Smart Inkubator Dashboard</h1>
+    <div class="card">
+        <p>Suhu Sekarang</p>
+        <div id="temp" class="value">0.0</div><span>°C</span>
     </div>
-    <div class="status-label">Status: <span id="status">Menghubungkan ke Firebase...</span></div>
+    <div class="card">
+        <p>Kelembaban Sekarang</p>
+        <div id="humi" class="value">0</div><span>%</span>
+    </div>
+    <div class="card">
+        <p>Status Sistem</p>
+        <div id="status" style="font-weight:bold;">Memuat...</div>
+    </div>
 
     <script>
-        // URL DATABASE SINGAPORE SESUAI GAMBAR KAMU
+        // GANTI DENGAN CONFIG FIREBASE KAMU SENDIRI
         const firebaseConfig = {
-            databaseURL: "https://smart-bsf-reactor-default-rtdb.asia-southeast1.firebasedatabase.app/"
+            databaseURL: "https://smart-bsf-reactor-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        db.ref("monitoring").on("value", (snapshot) => {
+        // Ambil data real-time dari node /inkubator (sesuai kodingan ESP32 baru)
+        db.ref('inkubator').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                document.getElementById("temp").innerText = data.temp;
-                document.getElementById("amonia").innerText = data.amonia;
-                document.getElementById("status").innerText = data.status;
-            } else {
-                document.getElementById("status").innerText = "Data belum tersedia di Firebase";
-            }
+            document.getElementById('temp').innerText = data.temp;
+            document.getElementById('humi').innerText = data.humi;
+            document.getElementById('status').innerText = data.status;
         });
     </script>
 </body>
