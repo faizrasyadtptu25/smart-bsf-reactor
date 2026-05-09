@@ -83,7 +83,7 @@
             chart.data.labels.push(new Date().toLocaleTimeString());
             chart.data.datasets[0].data.push(val.temp);
             chart.data.datasets[1].data.push(val.humi);
-            chart.update();
+            chart.update(); 
 
             // Update Table
             const row = `<tr><td>${val.time}</td><td>${val.temp}</td><td>${val.humi}</td><td>${val.servo}</td><td>${val.fan}</td><td>${val.lamp}</td><td>${val.sound}</td></tr>`;
