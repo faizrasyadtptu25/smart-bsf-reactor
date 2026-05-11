@@ -2,93 +2,142 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Incubator Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Dashboard: Smart Incubator</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #fffde7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar { background-color: #fbc02d !important; border-bottom: 5px solid #f9a825; }
-        .egg-card { background: white; border-radius: 20px; border-left: 10px solid #fbc02d; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .data-val { font-size: 2.5rem; font-weight: bold; color: #f57f17; }
-        .table-yellow { background-color: #fff9c4; }
-        th { background-color: #fbc02d !important; }
+        :root { --accent: #fbc02d; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+        .glass-card { background: var(--card); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .data-label { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .data-val { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .status-btn { width: 100%; border-radius: 10px; font-weight: bold; margin-top: 10px; }
+        .nav-custom { background: #1e293b; border-bottom: 2px solid var(--accent); padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+        .log-table { font-size: 0.85rem; color: #cbd5e1; }
+        .log-table th { background: #334155 !important; color: var(--accent); }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark shadow mb-4">
-        <div class="container-fluid justify-content-center">
-            <span class="navbar-brand mb-0 h1 text-dark">Smart Incubator: Sistem Penetasan Telur Otomatis berbasis IoT dengan Deteksi Suara</span>
-        </div>
-    </nav>
 
-    <div class="container">
-        <div class="row g-3 text-center mb-4">
-            <div class="col-md-3"><div class="egg-card"><h5>Suhu</h5><div id="t" class="data-val">0</div>C</div></div>
-            <div class="col-md-3"><div class="egg-card"><h5>Kelembaban</h5><div id="h" class="data-val">0</div>%</div></div>
-            <div class="col-md-3"><div class="egg-card"><h5>Suara</h5><div id="s" class="data-val">0</div></div></div>
-            <div class="col-md-3"><div class="egg-card"><h5>Servo</h5><div id="srv" class="data-val" style="font-size: 1.5rem;">Diam</div></div></div>
-        </div>
+<div class="nav-custom shadow mb-4">⚙️ SMART INCUBATOR CONTROL PANEL v3.0</div>
 
-        <div class="row mb-4">
-            <div class="col-md-8"><div class="egg-card"><h5>Grafik Monitoring</h5><canvas id="myChart"></canvas></div></div>
-            <div class="col-md-4">
-                <div class="egg-card h-100">
-                    <h5>Status Aktuator</h5>
-                    <ul class="list-group list-group-flush text-start">
-                        <li class="list-group-item d-flex justify-content-between">Lampu: <span id="l_i" class="badge">OFF</span></li>
-                        <li class="list-group-item d-flex justify-content-between">Fan: <span id="f_i" class="badge">OFF</span></li>
-                        <li class="list-group-item mt-3"><b>Anggota Kelompok:</b><br><small>Faiz, Nanda, Aldi, Siti, Nayla</small></li>
-                    </ul>
+<div class="container">
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="glass-card">
+                <h6 class="data-label">Konfigurasi Firebase</h6>
+                <div class="input-group mb-2">
+                    <span class="input-group-text bg-dark text-white border-0">Host</span>
+                    <input type="text" class="form-control bg-secondary text-white border-0" value="smart-bsf-reactor-default-rtdb.asia-southeast1.firebasedatabase.app" readonly>
                 </div>
+                <a href="https://docs.google.com/spreadsheets/d/1tOldPDWt8bSMQEHbNFAw1R3bnHn9nBJska-7hAAMKoY/" target="_blank" class="btn btn-outline-warning w-100 mt-2">📊 Buka Google Spreadsheet</a>
             </div>
         </div>
-
-        <div class="egg-card">
-            <h5>Tabel Riwayat Terakhir</h5>
-            <div class="table-responsive">
-                <table class="table table-yellow table-hover">
-                    <thead><tr><th>Waktu</th><th>Suhu</th><th>Humi</th><th>Servo</th><th>Fan</th><th>Lamp</th><th>Suara</th></tr></thead>
-                    <tbody id="table-body"></tbody>
-                </table>
+        <div class="col-md-4">
+            <div class="glass-card text-center">
+                <h6 class="data-label">Sinyal WiFi</h6>
+                <div class="data-val" id="wifi_val">-53 <small style="font-size: 1rem;">dBm</small></div>
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://smart-bsf-reactor-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-md-3"><div class="glass-card"><h6 class="data-label">Suhu</h6><div id="t" class="data-val">0</div><small>°C</small></div></div>
+        <div class="col-md-3"><div class="glass-card"><h6 class="data-label">Kelembaban</h6><div id="h" class="data-val">0</div><small>%</small></div></div>
+        <div class="col-md-3"><div class="glass-card"><h6 class="data-label">Suara (KY-037)</h6><div id="s" class="data-val">0</div></div></div>
+        <div class="col-md-3"><div class="glass-card"><h6 class="data-label">Servo</h6><div id="srv" class="data-val" style="font-size: 1.5rem;">DIAM</div></div></div>
+    </div>
 
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [], datasets: [{label:'Suhu', data:[], borderColor:'#f44336'}, {label:'Humi', data:[], borderColor:'#2196f3'}] }
-        });
+    <div class="row g-3 mb-4">
+        <div class="col-md-8"><div class="glass-card"><h5>Grafik Monitoring Riwayat</h5><canvas id="myChart" height="150"></canvas></div></div>
+        <div class="col-md-4">
+            <div class="glass-card">
+                <h5>Kendali Manual</h5>
+                <button onclick="toggleActuator('lamp')" id="btn_lamp" class="btn status-btn btn-outline-danger">LAMPU: OFF</button>
+                <button onclick="toggleActuator('fan')" id="btn_fan" class="btn status-btn btn-outline-primary">KIPAS: OFF</button>
+                <div class="mt-4">
+                    <h6 class="data-label">Interval Logging</h6>
+                    <select class="form-select bg-dark text-white border-0" id="log_interval">
+                        <option value="15">15 Menit</option>
+                        <option value="30">30 Menit</option>
+                        <option value="60">1 Jam</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        db.ref('inkubator').on('value', (snap) => {
-            const val = snap.val();
-            document.getElementById('t').innerText = val.temp.toFixed(1);
-            document.getElementById('h').innerText = val.humi.toFixed(0);
-            document.getElementById('s').innerText = val.sound;
-            document.getElementById('srv').innerText = val.servo;
-            document.getElementById('l_i').innerText = val.lamp ? "ON" : "OFF";
-            document.getElementById('l_i').className = val.lamp ? "badge bg-success" : "badge bg-danger";
-            document.getElementById('f_i').innerText = val.fan ? "ON" : "OFF";
-            document.getElementById('f_i').className = val.fan ? "badge bg-success" : "badge bg-danger";
+    <div class="glass-card mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5>Log Data Terbaru (SD Card Mirror)</h5>
+            <div>
+                <button class="btn btn-success btn-sm">START LOG</button>
+                <button class="btn btn-danger btn-sm">STOP</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover log-table">
+                <thead><tr><th>Waktu</th><th>Suhu</th><th>Humi</th><th>Lampu</th><th>Fan</th><th>Suara</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-            // Update Chart
-            if(chart.data.labels.length > 10) chart.data.labels.shift();
-            chart.data.labels.push(new Date().toLocaleTimeString());
-            chart.data.datasets[0].data.push(val.temp);
-            chart.data.datasets[1].data.push(val.humi);
-            chart.update(); 
+<script>
+    const firebaseConfig = { databaseURL: "https://smart-bsf-reactor-default-rtdb.asia-southeast1.firebasedatabase.app" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-            // Update Table
-            const row = `<tr><td>${val.time}</td><td>${val.temp}</td><td>${val.humi}</td><td>${val.servo}</td><td>${val.fan}</td><td>${val.lamp}</td><td>${val.sound}</td></tr>`;
-            document.getElementById('table-body').innerHTML = row + document.getElementById('table-body').innerHTML;
-        });
-    </script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{label:'Suhu', data:[], borderColor:'#f44336', tension:0.4}, {label:'Humi', data:[], borderColor:'#2196f3', tension:0.4}] },
+        options: { plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+    });
+
+    db.ref('inkubator').on('value', (snap) => {
+        const val = snap.val();
+        document.getElementById('t').innerText = val.temp.toFixed(1);
+        document.getElementById('h').innerText = val.humi.toFixed(1);
+        document.getElementById('s').innerText = val.sound;
+        document.getElementById('srv').innerText = val.servo.toUpperCase();
+        
+        // Update Buttons
+        updateBtn('btn_lamp', val.lamp, 'LAMPU');
+        updateBtn('btn_fan', val.fan, 'KIPAS');
+
+        // Update Chart
+        if(chart.data.labels.length > 15) chart.data.labels.shift();
+        chart.data.labels.push(new Date().toLocaleTimeString());
+        chart.data.datasets[0].data.push(val.temp);
+        chart.data.datasets[1].data.push(val.humi);
+        chart.update();
+
+        // Update Table Log
+        const row = `<tr><td>${new Date().toLocaleTimeString()}</td><td>${val.temp}°C</td><td>${val.humi}%</td><td>${val.lamp?'ON':'OFF'}</td><td>${val.fan?'ON':'OFF'}</td><td>${val.sound}</td></tr>`;
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = row + tbody.innerHTML;
+        if(tbody.rows.length > 10) tbody.deleteRow(10);
+    });
+
+    function updateBtn(id, state, label) {
+        const btn = document.getElementById(id);
+        btn.innerText = `${label}: ${state ? 'ON' : 'OFF'}`;
+        btn.className = state ? `btn status-btn btn-success` : `btn status-btn btn-outline-secondary`;
+    }
+
+    function toggleActuator(type) {
+        // Fungsi ini mengirim perintah balik ke Firebase untuk dibaca ESP32
+        const currentRef = db.ref('inkubator/' + type);
+        currentRef.once('value').then((s) => db.ref('inkubator/' + type).set(!s.val()));
+    }
+</script>
 </body>
 </html>
